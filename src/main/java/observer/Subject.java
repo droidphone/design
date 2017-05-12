@@ -1,28 +1,30 @@
 package observer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * @Package: observer
+ * @Package: rattlesnake.callback.core.observer
  * @Description: 被观察者
  * @author: liuxin
- * @date: 17/3/24 下午5:16
+ * @date: 17/4/21 上午9:31
  */
 public interface Subject {
     /**
      * 增加订阅者
      *
-     * @param observer
+     * @param channel
      */
-    void attach(Observer observer);
+    void attach(ChannelObject channel);
+
+    /**
+     * @param channel
+     */
+    void attach(ChannelObject... channel);
 
     /**
      * 删除订阅者
      *
-     * @param observer
+     * @param channel
      */
-    void detach(Observer observer);
+    void detach(ChannelObject channel);
 
     /**
      * 通知订阅者更新消息

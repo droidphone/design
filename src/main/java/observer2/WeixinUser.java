@@ -1,4 +1,4 @@
-package observer;
+package observer2;
 
 /**
  * @Package: observer

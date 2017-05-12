@@ -1,32 +1,94 @@
 package observer;
 
+
+import com.google.gson.Gson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Package: observer
- * @Description: ${todo}
+ * @Package: rattlesnake.callback.core.observer
+ * @Description: 封装失败连接，重试
  * @author: liuxin
- * @date: 17/3/24 下午5:23
+ * @date: 17/4/21 上午9:29
  */
 public class SubscriptionSubject implements Subject {
-    //储存订阅公众号的微信用户
-    private List<Observer> weixinUserlist = new ArrayList<>();
+    private static final Logger logger = LoggerFactory.getLogger(SubscriptionSubject.class);
+    private static final Gson gson = new Gson();
+    private List<ChannelObject> channelList = new ArrayList<ChannelObject>();
+    private static SubscriptionSubject ourInstance = null;
 
-    @Override
-    public void attach(Observer observer) {
-        weixinUserlist.add(observer);
+    private SubscriptionSubject() {
+
     }
 
-    @Override
-    public void detach(Observer observer) {
-        weixinUserlist.remove(observer);
+    public static SubscriptionSubject getInstance() {
+        if (ourInstance instanceof SubscriptionSubject) {
+            return ourInstance;
+        } else {
+            ourInstance = new SubscriptionSubject();
+        }
+        return ourInstance;
     }
 
-    @Override
-    public void notify(String message) {
-        for (Observer observer : weixinUserlist) {
-            observer.update(message);
+    /**
+     * 添加监控
+     *
+     * @param channel
+     */
+    public void attach(ChannelObject channel) {
+        if (!channelList.contains(channel)) {
+            channelList.add(channel);
         }
     }
+
+    /**
+     * 可变参数监控
+     *
+     * @param channel
+     */
+    public void attach(ChannelObject... channel) {
+        for (ChannelObject channelObject : channel) {
+            if (!channelList.contains(channelObject)) {
+                channelList.add(channelObject);
+            }
+        }
+    }
+
+    /**
+     * 移除
+     *
+     * @param channel
+     */
+    public void detach(ChannelObject channel) {
+        if (channelList.contains(channel)) {
+            channelList.remove(channel);
+        }
+
+    }
+
+    /**
+     * @param
+     */
+    public void notify(String message) {
+        if (channelList.size() > 0) {
+            for (ChannelObject channelWrapper : channelList) {
+                channelWrapper.update(message);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        ChannelObject channelObject1 = new ChannelObject("小明");
+        ChannelObject channelObject2 = new ChannelObject("小蓝");
+        ChannelObject channelObject3 = new ChannelObject("小张");
+        ChannelObject channelObject4 = new ChannelObject("小红");
+        SubscriptionSubject subscriptionSubject = getInstance();
+        subscriptionSubject.attach(channelObject1, channelObject2, channelObject3, channelObject4);
+        subscriptionSubject.notify("明天加班，请大家保持手机开机");
+
+    }
 }
+
